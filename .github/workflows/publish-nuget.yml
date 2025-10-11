@@ -30,14 +30,14 @@ jobs:
           echo "::notice file=.github/workflows/publish-nuget.yml::Package Version: $VERSION"
 
       - name: Restore Dependencies
-        run: dotnet restore ${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj
+        run: dotnet restore ${{ env.PROJECT_NAME }}.csproj
 
       - name: Build and Package (Pack)
         run: |
-          dotnet pack ${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj \
+          dotnet pack ${{ env.PROJECT_NAME }}.csproj \
             -c Release \
             /p:Version=${{ env.PACKAGE_VERSION }} \
             --output nupkgs
         
-      - name: Publicar Pacote no NuGet.org
+      - name: Publish Package to NuGet.org
         run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
