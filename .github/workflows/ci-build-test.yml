@@ -29,7 +29,7 @@ jobs:
           dotnet restore ${{ env.TEST_PROJECT_PATH }}
 
       - name: Build
-        run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
+        run: dotnet build ${{ env.PROJECT_PATH }} ${{ env.TEST_PROJECT_PATH }} -c Release --no-restore
             
       - name: Run Tests
         run: dotnet test ${{ env.TEST_PROJECT_PATH }} -c Release --no-build
