@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_PATH: src/M3U8.NET/M3U8.NET.csproj
+      TEST_PROJECT_PATH: tests/M3U8.NET.Tests.csproj
       
     steps:
       - name: Code Checkout
@@ -29,7 +30,9 @@ jobs:
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Restore Dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+        run: |
+          dotnet restore ${{ env.PROJECT_PATH }}
+          dotnet restore ${{ env.TEST_PROJECT_PATH }}
 
       - name: Build
         run: |
@@ -37,6 +40,12 @@ jobs:
             -c Release \
             /p:Version=${{ env.PACKAGE_VERSION }} \
             --no-restore
+            
+      - name: Run Tests
+        run: |
+          dotnet test ${{ env.TEST_PROJECT_PATH }} \
+            -c Release \
+            --no-build
             
       - name: Package (Pack)
         run: |

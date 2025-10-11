@@ -1,0 +1,35 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_PATH: src/M3U8.NET/M3U8.NET.csproj
+      TEST_PROJECT_PATH: tests/M3U8.NET.Tests.csproj
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+        
+      - name: Configure .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x' 
+
+      - name: Restore Dependencies
+        run: |
+          dotnet restore ${{ env.PROJECT_PATH }}
+          dotnet restore ${{ env.TEST_PROJECT_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.PROJECT_PATH }} -c Release --no-restore
+            
+      - name: Run Tests
+        run: dotnet test ${{ env.TEST_PROJECT_PATH }} -c Release --no-build
