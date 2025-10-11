@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
   	<PackageId>M3U8.NET</PackageId>
-  	<Version>1.0.1</Version>
   	<Authors>BNeto</Authors>
   	<Description>A library for parsing and validating M3U8.</Description>
   	<PackageTags>m3u8; hls; iptv; parser</PackageTags>

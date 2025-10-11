@@ -1,0 +1,43 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*' 
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: M3U8.NET
+
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Configure .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x' 
+
+      - name: Extract Tag Version
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "::notice file=.github/workflows/publish-nuget.yml::Package Version: $VERSION"
+
+      - name: Restore Dependencies
+        run: dotnet restore ${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj
+
+      - name: Build and Package (Pack)
+        run: |
+          dotnet pack ${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj \
+            -c Release \
+            /p:Version=${{ env.PACKAGE_VERSION }} \
+            --output nupkgs
+        
+      - name: Publicar Pacote no NuGet.org
+        run: dotnet nuget push nupkgs/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
