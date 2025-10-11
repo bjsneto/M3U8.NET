@@ -9,7 +9,7 @@ jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     env:
-      PROJECT_NAME: M3U8.NET
+      PROJECT_PATH: src/M3U8.NET/M3U8.NET.csproj
 
     steps:
       - name: Code Checkout
@@ -30,11 +30,11 @@ jobs:
           echo "::notice file=.github/workflows/publish-nuget.yml::Package Version: $VERSION"
 
       - name: Restore Dependencies
-        run: dotnet restore ${{ env.PROJECT_NAME }}.csproj
+        run: dotnet restore ${{ env.PROJECT_PATH }}
 
       - name: Build and Package (Pack)
         run: |
-          dotnet pack ${{ env.PROJECT_NAME }}.csproj \
+          dotnet pack ${{ env.PROJECT_PATH }} \
             -c Release \
             /p:Version=${{ env.PACKAGE_VERSION }} \
             --output nupkgs
