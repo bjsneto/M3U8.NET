@@ -3,14 +3,14 @@ name: Publish NuGet Package
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*' 
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
 
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     env:
       PROJECT_PATH: src/M3U8.NET/M3U8.NET.csproj
-
+      
     steps:
       - name: Code Checkout
         uses: actions/checkout@v4
@@ -27,16 +27,23 @@ jobs:
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
-          echo "::notice file=.github/workflows/publish-nuget.yml::Package Version: $VERSION"
 
       - name: Restore Dependencies
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      - name: Build and Package (Pack)
+      - name: Build
+        run: |
+          dotnet build ${{ env.PROJECT_PATH }} \
+            -c Release \
+            /p:Version=${{ env.PACKAGE_VERSION }} \
+            --no-restore
+            
+      - name: Package (Pack)
         run: |
           dotnet pack ${{ env.PROJECT_PATH }} \
             -c Release \
             /p:Version=${{ env.PACKAGE_VERSION }} \
+            --no-build \
             --output nupkgs
         
       - name: Publish Package to NuGet.org
