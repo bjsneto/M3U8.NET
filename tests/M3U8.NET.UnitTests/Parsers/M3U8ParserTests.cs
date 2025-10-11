@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using M3U8.NET.Exceptions;
 using M3U8.NET.Models;
-using M3U8.NET.Parsers;
 using M3U8.NET.UnitTests.Builders;
 using M3U8.NET.UnitTests.Fixtures;
 using M3U8.NET.Validators;
@@ -20,8 +19,6 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
     [Fact]
     public void Parse_Should_Parse_Simple_M3U8_With_Metadata()
     {
-        
-        var parser = new M3U8Parser();
         var input = _fixture.SimpleExample1;
 
         var expectedSegment = new SegmentBuilder()
@@ -34,11 +31,8 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
             .WithAttribute("group-title", "Category A | Movies")
             .Build();
 
-        
-        var result = parser.Parse(input);
-        M3U8Validator.Validate(result);
+        var result = Playlist.LoadFromString(input); 
 
-        
         result.Should().NotBeNull();
         result.SessionData.Should().ContainKey("DATA-ID").And.ContainValue("session.id.example");
         result.Segments.Should().HaveCount(1);
@@ -48,8 +42,6 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
     [Fact]
     public void Parse_Should_Parse_Simple_M3U8_Without_Extra_Attributes()
     {
-        
-        var parser = new M3U8Parser();
         var input = _fixture.SimpleExample2;
 
         var expectedSegment = new SegmentBuilder()
@@ -58,11 +50,8 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
             .WithUri("http://stream.example.net:80/live/54321/segment2.ts")
             .Build();
 
-        
-        var result = parser.Parse(input);
-        M3U8Validator.Validate(result);
+        var result = Playlist.LoadFromString(input);  
 
-        
         result.Should().NotBeNull();
         result.SessionData.Should().ContainKey("DATA-ID").And.ContainValue("session.id.example");
         result.Segments.Should().HaveCount(1);
@@ -72,14 +61,9 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
     [Fact]
     public void Parse_Should_Throw_Exception_If_Not_Start_With_EXTM3U()
     {
-        
-        var parser = new M3U8Parser();
-        var invalidInput = @"#EXT-X-SESSION-DATA:DATA-ID=""session.id.example""
-#EXTINF:-1,Channel Two [SD]
-http://stream.example.net:80/live/54321/segment2.ts";
+        var invalidInput = @"#EXT-X-SESSION-DATA:DATA-ID=""session.id.example""#EXTINF:-1,Channel Two [SD] http://stream.example.net:80/live/54321/segment2.ts";
 
-        
-        Action act = () => parser.Parse(invalidInput);
+        Action act = () => Playlist.LoadFromString(invalidInput); 
         act.Should().Throw<InvalidM3U8FormatException>()
            .WithMessage("Playlist must start with #EXTM3U.");
     }
@@ -87,8 +71,6 @@ http://stream.example.net:80/live/54321/segment2.ts";
     [Fact]
     public void Parse_Should_Parse_Multi_Segment_M3U8()
     {
-        
-        var parser = new M3U8Parser();
         var input = _fixture.MultiSegmentExample;
 
         var expectedSegment1 = new SegmentBuilder()
@@ -117,11 +99,8 @@ http://stream.example.net:80/live/54321/segment2.ts";
             .WithUri("http://example.com/testclip.ts")
             .Build();
 
-        
-        var result = parser.Parse(input);
-        M3U8Validator.Validate(result);
+        var result = Playlist.LoadFromString(input);  // Substitui parser.Parse + Validate
 
-        
         result.Should().NotBeNull();
         result.Segments.Should().HaveCount(3);
         result.Segments[0].Should().BeEquivalentTo(expectedSegment1);

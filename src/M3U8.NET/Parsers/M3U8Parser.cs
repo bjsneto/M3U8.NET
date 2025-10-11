@@ -4,8 +4,14 @@ using System.Text.RegularExpressions;
 
 namespace M3U8.NET.Parsers;
 
-public partial class M3U8Parser
+internal partial class M3U8Parser
 {
+    private M3U8Parser() { }
+
+    internal static M3U8Parser Create() 
+    {
+        return new M3U8Parser();
+    }
     public Playlist Parse(string content)
     {
         var playlist = new Playlist();
