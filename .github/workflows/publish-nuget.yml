@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_PATH: src/M3U8.NET/M3U8.NET.csproj
-      TEST_PROJECT_PATH: tests/M3U8.NET.Tests.csproj
+      TEST_PROJECT_PATH: tests/M3U8.NET.UnitTests/M3U8.NET.UnitTests.csproj
       
     steps:
       - name: Code Checkout
