@@ -1,17 +1,12 @@
-﻿using M3U8.NET.Exceptions;
-using M3U8.NET.Models;
+﻿using M3U8.NET.Constants;
+using M3U8.NET.Exceptions;
+using M3U8.NET.Parsers.Interfaces;
 using System.Text.RegularExpressions;
 
 namespace M3U8.NET.Parsers;
 
-internal partial class M3U8Parser
+internal partial class M3U8Parser : IPlaylistParser
 {
-    private M3U8Parser() { }
-
-    internal static M3U8Parser Create() 
-    {
-        return new M3U8Parser();
-    }
     public Playlist Parse(string content)
     {
         var playlist = new Playlist();
@@ -19,9 +14,9 @@ internal partial class M3U8Parser
         using var reader = new StringReader(content);
 
         string? line = reader.ReadLine()?.Trim();
-        if (string.IsNullOrWhiteSpace(line) || line != "#EXTM3U")
+        if (string.IsNullOrWhiteSpace(line) || line != Tag.EXTM3U)
         {
-            throw new InvalidM3U8FormatException("Playlist must start with #EXTM3U.");
+            throw new InvalidM3U8FormatException($"Playlist must start with {Tag.EXTM3U}.");
         }
 
         Segment? currentSegment = null;
@@ -32,20 +27,20 @@ internal partial class M3U8Parser
             if (string.IsNullOrWhiteSpace(line) || char.IsControl(line[0])) 
                 continue; 
 
-            if (line.StartsWith("#EXT-X-SESSION-DATA:"))
+            if (line.StartsWith(Tag.EXTXSESSIONDATA))
             {
-                var dataPart = line.Substring("#EXT-X-SESSION-DATA:".Length);
+                var dataPart = line[Tag.EXTXSESSIONDATA.Length..];
                 var attributes = ParseAttributes(dataPart);
                 foreach (var attr in attributes)
                 {
                     playlist.SessionData[attr.Key] = attr.Value.Trim('"');
                 }
             }
-            else if (line.StartsWith("#EXTINF:"))
+            else if (line.StartsWith(Tag.EXTINF))
             {
                 currentSegment = new Segment();
-                var infPart = line.Substring("#EXTINF:".Length);
-                var parts = infPart.Split(new[] { ',' }, 2);
+                var infPart = line[Tag.EXTINF.Length..];
+                var parts = infPart.Split([','], 2);
 
                 if (parts.Length >= 1)
                 {
@@ -67,14 +62,9 @@ internal partial class M3U8Parser
                 }
 
                 var nextLine = reader.ReadLine()?.Trim();
-                if (!string.IsNullOrWhiteSpace(nextLine) && !nextLine.StartsWith("#"))
-                {
-                    currentSegment.Uri = nextLine;
-                }
-                else
-                {
+                currentSegment.Uri = !string.IsNullOrWhiteSpace(nextLine) && !nextLine.StartsWith(value: "#") 
+                    ? nextLine :
                     throw new InvalidM3U8FormatException("Missing URI after #EXTINF.");
-                }
 
                 playlist.Segments.Add(currentSegment);
             }

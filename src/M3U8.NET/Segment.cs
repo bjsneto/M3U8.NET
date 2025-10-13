@@ -1,4 +1,4 @@
-﻿namespace M3U8.NET.Models;
+﻿namespace M3U8.NET;
 
 public class Segment
 {

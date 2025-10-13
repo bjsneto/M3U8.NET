@@ -1,7 +1,7 @@
 ﻿using M3U8.NET.Parsers;
-using M3U8.NET.Validators;
+using M3U8.NET.Parsers.Interfaces;
 
-namespace M3U8.NET.Models;
+namespace M3U8.NET;
 
 public class Playlist
 {
@@ -28,9 +28,8 @@ public class Playlist
 
     private static Playlist ParsePlaylistContent(string content)
     {
-        var parser = M3U8Parser.Create();
-        var playlist = parser.Parse(content);
-        M3U8Validator.Validate(playlist);
-        return playlist;
+        int version = PlaylistParserFactory.DetectVersion(content);
+        IPlaylistParser parserStrategy = PlaylistParserFactory.GetParser(version);
+        return parserStrategy.Parse(content);
     }
 }
