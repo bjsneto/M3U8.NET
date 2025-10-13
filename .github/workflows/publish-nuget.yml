@@ -35,18 +35,11 @@ jobs:
           dotnet restore ${{ env.TEST_PROJECT_PATH }}
 
       - name: Build
-        run: |
-          dotnet build ${{ env.PROJECT_PATH }} \
-            -c Release \
-            /p:Version=${{ env.PACKAGE_VERSION }} \
-            --no-restore
+        run: dotnet build -c Release --no-restore
             
       - name: Run Tests
-        run: |
-          dotnet test ${{ env.TEST_PROJECT_PATH }} \
-            -c Release \
-            --no-build
-            
+        run: dotnet test ${{ env.TEST_PROJECT_PATH }} -c Release --no-build
+
       - name: Package (Pack)
         run: |
           dotnet pack ${{ env.PROJECT_PATH }} \
