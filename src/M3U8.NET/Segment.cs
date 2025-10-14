@@ -1,9 +1,8 @@
 ﻿namespace M3U8.NET;
 
-public class Segment
-{
-    public double Duration { get; set; }
-    public string Title { get; set; } 
-    public string Uri { get; set; } 
-    public Dictionary<string, string> Attributes { get; set; } = [];
-}
+public sealed record Segment(
+    double Duration,
+    string? Title,
+    string Uri,
+    IReadOnlyDictionary<string, string> Attributes
+);

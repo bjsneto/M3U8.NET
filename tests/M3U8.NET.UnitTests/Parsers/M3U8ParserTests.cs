@@ -1,7 +1,9 @@
 ﻿using FluentAssertions;
+using M3U8.NET.Constants;
 using M3U8.NET.Exceptions;
 using M3U8.NET.UnitTests.Builders;
 using M3U8.NET.UnitTests.Fixtures;
+using System.Text;
 
 namespace M3U8.NET.UnitTests.Parsers;
 
@@ -17,6 +19,7 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
     [Fact]
     public void Parse_Should_Parse_Simple_M3U8_With_Metadata()
     {
+
         var input = _fixture.SimpleExample1;
 
         var expectedSegment = new SegmentBuilder()
@@ -63,7 +66,7 @@ public class M3U8ParserTests : IClassFixture<M3U8Fixture>
 
         Action act = () => Playlist.LoadFromString(invalidInput); 
         act.Should().Throw<InvalidM3U8FormatException>()
-           .WithMessage("Playlist must start with #EXTM3U.");
+           .WithMessage($"Playlist must start with {Tag.EXTM3U}. (Line 1): {invalidInput}");
     }
 
     [Fact]

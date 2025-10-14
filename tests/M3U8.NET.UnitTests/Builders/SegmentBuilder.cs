@@ -1,43 +1,56 @@
 ﻿using Bogus;
+using Bogus.DataSets;
+using System.Collections.ObjectModel;
 
 namespace M3U8.NET.UnitTests.Builders;
 
 public class SegmentBuilder
 {
-    private readonly Segment _segment = new();
+    private readonly Faker faker = new Faker();
+    private double _duration;
+    private string? _title;
+    private string _uri;
+    private readonly Dictionary<string, string> _attributes;
 
     public SegmentBuilder()
     {
-        var faker = new Faker();
-        _segment.Duration = -1;
-        _segment.Title = faker.Random.String2(10);
-        _segment.Uri = faker.Internet.Url();
-        _segment.Attributes = [];
+        _duration = -1;
+        _title = faker.Random.String2(10);
+        _uri = faker.Internet.Url();
+        _attributes = new Dictionary<string, string>();
     }
 
     public SegmentBuilder WithDuration(double duration)
     {
-        _segment.Duration = duration;
+        _duration = duration;
         return this;
     }
 
     public SegmentBuilder WithTitle(string title)
     {
-        _segment.Title = title;
+        _title = title;
         return this;
     }
 
     public SegmentBuilder WithUri(string uri)
     {
-        _segment.Uri = uri;
+        _uri = uri;
         return this;
     }
 
     public SegmentBuilder WithAttribute(string key, string value)
     {
-        _segment.Attributes[key] = value;
+        _attributes[key] = value;
         return this;
     }
 
-    public Segment Build() => _segment;
+    public Segment Build()
+    {
+        return new Segment(
+            _duration,
+            _title,
+            _uri,
+            new ReadOnlyDictionary<string, string>(_attributes)
+        );
+    }
 }
