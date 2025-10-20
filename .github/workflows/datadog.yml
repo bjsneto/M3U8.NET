@@ -1,0 +1,61 @@
+name: Send Datadog Events
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [published]
+
+jobs:
+  notify-datadog:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Send Deployment Event to Datadog
+        run: |
+          curl -X POST "https://api.datadoghq.com/api/v1/events" \
+            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "title": "M3U8.NET Deployment",
+              "text": "Deployment of M3U8.NET ${{ github.ref_name }} by ${{ github.actor }}",
+              "priority": "normal",
+              "tags": [
+                "repo:bjsneto/M3U8.NET",
+                "branch:${{ github.ref_name }}",
+                "commit:${{ github.sha }}",
+                "actor:${{ github.actor }}"
+              ],
+              "alert_type": "info"
+            }'
+      
+      - name: Run Tests and Send Metrics
+        run: |
+          dotnet test --logger "console;verbosity=minimal" > test-results.txt
+          
+          PASSED=$(grep -c "Passed!" test-results.txt || echo "0")
+          FAILED=$(grep -c "Failed!" test-results.txt || echo "0")
+          
+          curl -X POST "https://api.datadoghq.com/api/v1/series" \
+            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"series\": [
+                {
+                  \"metric\": \"m3u8net.tests.passed\",
+                  \"points\": [[$(date +%s), $PASSED]],
+                  \"type\": \"gauge\",
+                  \"tags\": [\"repo:bjsneto/M3U8.NET\", \"branch:${{ github.ref_name }}\"]
+                },
+                {
+                  \"metric\": \"m3u8net.tests.failed\",
+                  \"points\": [[$(date +%s), $FAILED]],
+                  \"type\": \"gauge\",
+                  \"tags\": [\"repo:bjsneto/M3U8.NET\", \"branch:${{ github.ref_name }}\"]
+                }
+              ]
+            }"
